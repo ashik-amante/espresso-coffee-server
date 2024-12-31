@@ -16,7 +16,7 @@ console.log(process.env.coffee_user);
 console.log(process.env.coffee_pass);
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.coffee_user}:${process.env.coffee_pass}@cluster0.pdx5h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -48,6 +48,23 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+    // get single coffee details
+    app.get('/coffees/:id', async(req,res)=>{
+      const id = req.params.id;
+      const quary = {_id: new ObjectId(id)}
+      const result = await coffeeCollection.findOne(quary)
+      res.send(result)
+    })
+    // search coffees based on email
+    app.get('/coffees/email/:email',async(req,res)=>{
+      console.log(req.params.email);
+      const result = await coffeeCollection.find({email: req.params.email}).toArray()
+      res.send(result)
+    })
+
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
