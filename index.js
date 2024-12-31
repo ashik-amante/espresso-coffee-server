@@ -36,29 +36,56 @@ async function run() {
     const coffeeCollection = client.db('espressoDB').collection('espresso');
 
     // add a coffee
-    app.post('/coffees', async(req,res)=>{
-        const coffee = req.body;
-        console.log(coffee);
-        const result = await coffeeCollection.insertOne(coffee)
-        res.send(result)
+    app.post('/coffees', async (req, res) => {
+      const coffee = req.body;
+      console.log(coffee);
+      const result = await coffeeCollection.insertOne(coffee)
+      res.send(result)
     })
     // get coffee data
-    app.get('/coffees',async(req,res)=>{
-        const cursor = coffeeCollection.find();
-        const result = await cursor.toArray()
-        res.send(result)
+    app.get('/coffees', async (req, res) => {
+      const cursor = coffeeCollection.find();
+      const result = await cursor.toArray()
+      res.send(result)
     })
     // get single coffee details
-    app.get('/coffees/:id', async(req,res)=>{
+    app.get('/coffees/:id', async (req, res) => {
       const id = req.params.id;
-      const quary = {_id: new ObjectId(id)}
+      const quary = { _id: new ObjectId(id) }
       const result = await coffeeCollection.findOne(quary)
       res.send(result)
     })
     // search coffees based on email
-    app.get('/coffees/email/:email',async(req,res)=>{
+    app.get('/coffees/email/:email', async (req, res) => {
       console.log(req.params.email);
-      const result = await coffeeCollection.find({email: req.params.email}).toArray()
+      const result = await coffeeCollection.find({ email: req.params.email }).toArray()
+      res.send(result)
+    })
+    // dlelete a particular coffee
+    app.delete('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const quary = { _id: new ObjectId(id) }
+      const result = await coffeeCollection.deleteOne(quary)
+      res.send(result)
+    })
+    // update a coffee
+    app.put('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updatedCoffee = req.body;
+      const options = { upsert: true };
+      const coffee = {
+        $set: {
+          name: updatedCoffee.name,
+          chef: updatedCoffee.chef,
+          supplier: updatedCoffee.supplier,
+          taste: updatedCoffee.taste,
+          category: updatedCoffee.category,
+          details: updatedCoffee.details,
+          photo: updatedCoffee.photo,
+        }
+      }
+      const result = await coffeeCollection.updateOne(filter,coffee,options)
       res.send(result)
     })
 
@@ -79,8 +106,8 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => [
-    res.send('coffee server is running')
+  res.send('coffee server is running')
 ])
 app.listen(port, () => {
-    console.log('port is working on', port);
+  console.log('port is working on', port);
 })
